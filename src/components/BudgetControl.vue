@@ -1,5 +1,23 @@
 <script setup>
+import { watch, computed, onMounted } from 'vue'
 import image from '../assets/img/grafico.jpg'
+import { formatQuantity } from '../helpers'
+
+const props = defineProps({
+    budget: {
+        type: Number,
+        requiered: true
+    },
+    availableBudget: {
+        type: Number,
+        requiered: true
+    }
+})
+
+const calculateAvalibleBudget = computed(() => {
+    return 
+})
+
 </script>
 
 <template>
@@ -11,9 +29,9 @@ import image from '../assets/img/grafico.jpg'
             <button class="budget-reset">
                 Resetear Presupusto
             </button>
-            <p><span>Presupuesto:</span> $0</p>
-            <p><span>Disponible:</span> $0</p>
-            <p><span>Gastado:</span> $0</p>
+            <p><span>Presupuesto: </span>{{ formatQuantity(budget) }}</p>
+            <p><span>Disponible: </span>{{ formatQuantity(availableBudget) }}</p>
+            <p><span>Gastado: </span> $0</p>
         </div>
     </div>
 </template>
