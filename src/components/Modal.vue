@@ -1,14 +1,64 @@
 <script setup>
+import { ref } from 'vue'
+import Alert from './Alert.vue'
 import closeModal from '../assets/img/cerrar.svg'
 
-defineEmits(['close-modal'])
+const error = ref('')
+
+const emit = defineEmits(['close-modal', 'save-expense', 'update:name', 'update:category', 'update:quantity'])
 const props = defineProps({
     modal: {
         type: Object,
-        requiered: true
+        required: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    category: {
+        type: String,
+        required: true
+    },
+    quantity: {
+        type: [String, Number],
+        required: true
+    },
+    availableBudget: {
+        type: Number,
+        required: true
     }
 })
 
+const addExpense = () => {
+    const { name, category, quantity, availableBudget } = props
+    if ([name, category, quantity].includes('')) {
+        error.value = 'Todos los campos son obligatorios'
+        setTimeout(() => {
+            error.value = ''
+        }, 3000);
+        return
+    }
+
+    if (quantity <= 0) {
+        error.value = 'Cantidad no válida'
+        setTimeout(() => {
+            error.value = ''
+        }, 3000);
+        return
+    }
+
+    //Validate avalible budget
+    if (quantity > availableBudget) {
+        error.value = 'El gasto ha excedido el presupuesto'
+        setTimeout(() => {
+            error.value = ''
+        }, 3000);
+        return
+    }
+    
+    emit('save-expense')
+
+}
 </script>
 
 <template>
@@ -17,30 +67,31 @@ const props = defineProps({
             <img :src="closeModal" alt="Icono cerrar modal">
         </div>
         <div class="container form-container" :class="[modal.animate ? 'animate' : 'close']">
-            <form class="new-budget">
-                <legend>
-                    Añadir Gasto
-                </legend>
+            <form class="new-expense" @submit.prevent="addExpense">
+                <legend>Añadir Gasto</legend>
+                <Alert v-if="error">{{ error }}</Alert>
                 <div class="field">
-                    <label for="budget-name">Nombre Gasto:</label>
-                    <input type="number" name="budget-name" id="budget-name" placeholder="Añade el nombre del gasto">
+                    <label for="expense-name">Nombre Gasto:</label>
+                    <input type="text" name="expense-name" id="expense-name" placeholder="Añade el nombre del gasto"
+                        :value="name" @input="$emit('update:name', $event.target.value)">
                 </div>
                 <div class="field">
-                    <label for="budget-quantity">Cantidad:</label>
-                    <input type="number" name="budget-quantity" id="budget-quantity"
-                        placeholder="Añade la cantidad del gasto">
+                    <label for="expense-quantity">Cantidad:</label>
+                    <input type="number" name="expense-quantity" id="expense-quantity"
+                        placeholder="Añade la cantidad del gasto" :value="quantity"
+                        @input="$emit('update:quantity', +$event.target.value)">
                 </div>
                 <div class="field">
-                    <label for="budget-category">Categoría: </label>
-                    <select name="budget-category" id="budget-category">
-                        <option value="">-- Seleccione --</option>
+                    <label for="expense-category">Categoría: </label>
+                    <select name="expense-category" id="expense-category" :value="category"
+                        @input="$emit('update:category', $event.target.value)">
+                        <option value="" disabled>-- Seleccione --</option>
                         <option value="ahorro">Ahorro</option>
                         <option value="comida">Comida</option>
                         <option value="casa">Casa</option>
                         <option value="gastos">Gastos varios</option>
                         <option value="ocio">Ocio</option>
                         <option value="salud">Salud</option>
-                        <option value="transporte">Transporte</option>
                         <option value="suscripciones">Suscripciones</option>
                     </select>
                 </div>
@@ -84,21 +135,21 @@ const props = defineProps({
     cursor: pointer;
 }
 
-.new-budget {
+.new-expense {
     margin: 10rem auto 0 auto;
     display: grid;
     gap: 2rem;
 }
 
-.new-budget legend {
+.new-expense legend {
     text-align: center;
     color: var(--white);
     font-size: 3rem;
     font-weight: 700;
 }
 
-.new-budget input,
-.new-budget select {
+.new-expense input,
+.new-expense select {
     background-color: var(--white-gray);
     border-radius: 1rem;
     padding: 1rem;
@@ -106,12 +157,12 @@ const props = defineProps({
     font-size: 2.2rem;
 }
 
-.new-budget label {
+.new-expense label {
     color: var(--white);
     font-size: 3rem;
 }
 
-.new-budget input[type='submit'] {
+.new-expense input[type='submit'] {
     background-color: var(--blue);
     color: var(--white);
     font-weight: 700;
@@ -119,7 +170,7 @@ const props = defineProps({
     transition: .3s ease all;
 }
 
-.new-budget input[type='submit']:hover {
+.new-expense input[type='submit']:hover {
     background-color: var(--dark-blue);
 }
 

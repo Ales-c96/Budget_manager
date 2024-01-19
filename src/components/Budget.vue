@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import Alerta from './Alert.vue'
+import Alert from './Alert.vue'
 
 const emit = defineEmits(['define-budget'])
 
@@ -26,9 +26,9 @@ const defineBudget = () => {
 
 <template>
     <form class="budget-form" @submit.prevent="defineBudget">
-        <Alerta v-if="error">
+        <Alert v-if="error">
             <p>{{ error }}</p>
-        </Alerta>
+        </Alert>
         <div class="field">
             <label for="new-budget">Define el presupuesto</label>
             <input type="number" name="new-budget" id="new-budget" placeholder="Añade un nuevo presupuesto" min="0"

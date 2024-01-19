@@ -11,11 +11,15 @@ const props = defineProps({
     availableBudget: {
         type: Number,
         requiered: true
+    },
+    expended: {
+        type: Number,
+        requiered: true
     }
 })
 
 const calculateAvalibleBudget = computed(() => {
-    return 
+    return
 })
 
 </script>
@@ -31,7 +35,7 @@ const calculateAvalibleBudget = computed(() => {
             </button>
             <p><span>Presupuesto: </span>{{ formatQuantity(budget) }}</p>
             <p><span>Disponible: </span>{{ formatQuantity(availableBudget) }}</p>
-            <p><span>Gastado: </span> $0</p>
+            <p><span>Gastado: </span>{{ formatQuantity(expended) }}</p>
         </div>
     </div>
 </template>

@@ -1,18 +1,44 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
+import { generateID } from './helpers'
+
 import Budget from './components/Budget.vue'
 import BudgetControl from './components/BudgetControl.vue'
 import Modal from './components/Modal.vue'
+import Expense from './components/Expense.vue'
 
 //Assets
 import newBudgetIcon from './assets/img/nuevo-gasto.svg'
 
 const budget = ref(0)
 const availableBudget = ref(0)
+const expended = ref(0)
+const expenses = ref([])
+
+const expense = reactive({
+  id: null,
+  date: Date.now(),
+  name: '',
+  quantity: '',
+  category: ''
+})
 const modal = reactive({
   show: false,
   animate: false
 })
+
+watch(expenses, () => {
+  const totalExpenses = expenses.value.reduce((total, expense) => expense.quantity + total, 0)
+  expended.value = totalExpenses
+  availableBudget.value = budget.value - totalExpenses
+}, {
+  deep: true
+})
+
+const defineBudget = (quantity) => {
+  budget.value = quantity
+  availableBudget.value = quantity
+}
 
 const showModal = () => {
   modal.show = true
@@ -28,27 +54,45 @@ const closeModal = () => {
   modal.animate = false
 }
 
-const defineBudget = (quantity) => {
-  budget.value = quantity
-  availableBudget.value = quantity
+const saveExpense = () => {
+  expenses.value.push({
+    ...expense,
+    id: generateID()
+  })
+  //Close the modal after setting an expense
+  closeModal()
+  //Reload the expense Object
+  Object.assign(expense, {
+    id: null,
+    date: Date.now(),
+    name: '',
+    quantity: '',
+    category: ''
+  })
 }
 
 </script>
 
 <template>
-  <div>
+  <div :class="{ fix: modal.show }">
     <header>
       <h1>Gestor de Gastos</h1>
       <div class="header-container container shadow">
         <Budget v-if="budget === 0" @define-budget="defineBudget" />
-        <BudgetControl v-else :budget="budget" :availableBudget="availableBudget" />
+        <BudgetControl v-else :budget="budget" :availableBudget="availableBudget" :expended="expended" />
       </div>
     </header>
     <main v-if="budget > 0">
+      <div class="expenses-list container">
+        <h2>{{ expenses.length > 0 ? 'Gastos' : 'No hay gastos' }}</h2>
+        <Expense v-for="expense in expenses" :key="expense.id" :expense="expense" />
+      </div>
       <div class="create-budget">
         <img :src="newBudgetIcon" alt="Icono nuevo gasto" @click="showModal">
       </div>
-      <Modal v-if="modal.show" :modal="modal" @close-modal="closeModal" />
+      <Modal v-if="modal.show" @close-modal="closeModal" @save-expense="saveExpense" :modal="modal"
+        v-model:name="expense.name" v-model:category="expense.category" v-model:quantity="expense.quantity"
+        :availableBudget="availableBudget" />
     </main>
   </div>
 </template>
@@ -103,6 +147,11 @@ header h1 {
   text-align: center;
 }
 
+.fix {
+  overflow: hidden;
+  height: 100vh;
+}
+
 .container {
   width: 90%;
   max-width: 80rem;
@@ -131,5 +180,14 @@ header h1 {
 .create-budget img {
   width: 5rem;
   cursor: pointer;
+}
+
+.expenses-list {
+  margin-top: 10rem;
+}
+
+.expenses-list h2 {
+  font-weight: 900;
+  color: var(--dark-gray);
 }
 </style>
