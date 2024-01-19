@@ -2,6 +2,12 @@
 import closeModal from '../assets/img/cerrar.svg'
 
 defineEmits(['close-modal'])
+const props = defineProps({
+    modal: {
+        type: Object,
+        requiered: true
+    }
+})
 
 </script>
 
@@ -10,7 +16,7 @@ defineEmits(['close-modal'])
         <div class="close-modal" @click="$emit('close-modal')">
             <img :src="closeModal" alt="Icono cerrar modal">
         </div>
-        <div class="container">
+        <div class="container form-container" :class="[modal.animate ? 'animate' : 'close']">
             <form class="new-budget">
                 <legend>
                     Añadir Gasto
@@ -45,6 +51,19 @@ defineEmits(['close-modal'])
 </template>
 
 <style scoped>
+.form-container {
+    transition: 300ms ease-in all;
+    opacity: 0;
+}
+
+.form-container.animate {
+    opacity: 1;
+}
+
+.form-container.close {
+    opacity: 0;
+}
+
 .modal {
     position: absolute;
     background-color: rgb(0 0 0 / 0.9);
@@ -86,10 +105,12 @@ defineEmits(['close-modal'])
     border: none;
     font-size: 2.2rem;
 }
+
 .new-budget label {
     color: var(--white);
     font-size: 3rem;
 }
+
 .new-budget input[type='submit'] {
     background-color: var(--blue);
     color: var(--white);
@@ -97,6 +118,7 @@ defineEmits(['close-modal'])
     cursor: pointer;
     transition: .3s ease all;
 }
+
 .new-budget input[type='submit']:hover {
     background-color: var(--dark-blue);
 }
@@ -105,5 +127,4 @@ defineEmits(['close-modal'])
     display: grid;
     gap: 2rem;
 }
-
 </style>

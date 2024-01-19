@@ -16,11 +16,15 @@ const modal = reactive({
 
 const showModal = () => {
   modal.show = true
-  modal.animate = true
+  setTimeout(() => {
+    modal.animate = true
+  }, 300);
 }
 
 const closeModal = () => {
-  modal.show = false
+  setTimeout(() => {
+    modal.show = false
+  }, 300);
   modal.animate = false
 }
 
@@ -44,7 +48,7 @@ const defineBudget = (quantity) => {
       <div class="create-budget">
         <img :src="newBudgetIcon" alt="Icono nuevo gasto" @click="showModal">
       </div>
-      <Modal v-if="modal.show" @close-modal="closeModal"/>
+      <Modal v-if="modal.show" :modal="modal" @close-modal="closeModal" />
     </main>
   </div>
 </template>
