@@ -1,11 +1,11 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Alert from './Alert.vue'
 import closeModal from '../assets/img/cerrar.svg'
 
 const error = ref('')
 
-const emit = defineEmits(['close-modal', 'save-expense', 'update:name', 'update:category', 'update:quantity'])
+const emit = defineEmits(['close-modal', 'save-expense', 'update:name', 'update:category', 'update:quantity', 'delete-expense'])
 const props = defineProps({
     modal: {
         type: Object,
@@ -26,39 +26,62 @@ const props = defineProps({
     availableBudget: {
         type: Number,
         required: true
+    },
+    id: {
+        type: [String, null],
+        requiered: true
+    },
+    isEdit: {
+        type: Boolean,
+        required: true
     }
 })
 
+const showErrorMessage = msg => {
+    error.value = msg
+    setTimeout(() => {
+        error.value = ''
+    }, 3000);
+}
+
+const oldQuantity = props.quantity;
+
 const addExpense = () => {
-    const { name, category, quantity, availableBudget } = props
+    const { name, category, quantity, availableBudget, id } = props
     if ([name, category, quantity].includes('')) {
-        error.value = 'Todos los campos son obligatorios'
-        setTimeout(() => {
-            error.value = ''
-        }, 3000);
+        showErrorMessage('Todos los campos son obligatorios')
         return
     }
 
     if (quantity <= 0) {
-        error.value = 'Cantidad no válida'
-        setTimeout(() => {
-            error.value = ''
-        }, 3000);
+        showErrorMessage('Cantidad no válida')
         return
     }
 
     //Validate avalible budget
-    if (quantity > availableBudget) {
-        error.value = 'El gasto ha excedido el presupuesto'
-        setTimeout(() => {
-            error.value = ''
-        }, 3000);
-        return
+    if (id) {
+        
+        if (quantity > oldQuantity + availableBudget) {
+            showErrorMessage('El gasto ha excedido el presupuesto')
+            return
+        }
+
+    } else {
+
+        if (quantity > availableBudget) {
+            showErrorMessage('El gasto ha excedido el presupuesto')
+            return
+        }
+
     }
-    
+
     emit('save-expense')
 
 }
+
+const isEdit = computed(() => {
+    return props.id
+})
 </script>
 
 <template>
@@ -68,7 +91,7 @@ const addExpense = () => {
         </div>
         <div class="container form-container" :class="[modal.animate ? 'animate' : 'close']">
             <form class="new-expense" @submit.prevent="addExpense">
-                <legend>Añadir Gasto</legend>
+                <legend>{{ isEdit ? 'Editar Gasto' : 'Añadir un nuevo gasto' }}</legend>
                 <Alert v-if="error">{{ error }}</Alert>
                 <div class="field">
                     <label for="expense-name">Nombre Gasto:</label>
@@ -95,8 +118,9 @@ const addExpense = () => {
                         <option value="suscripciones">Suscripciones</option>
                     </select>
                 </div>
-                <input type="submit" value="Añadir Gasto">
+                <input type="submit" :value="[isEdit ? 'Guardar cambios' : 'Añadir gasto']">
             </form>
+            <button type="button" class="delete" v-if="isEdit" @click="$emit('delete-expense')">Eliminar Gasto</button>
         </div>
     </div>
 </template>
@@ -113,6 +137,18 @@ const addExpense = () => {
 
 .form-container.close {
     opacity: 0;
+}
+
+.delete {
+    border: none;
+    padding: 1rem;
+    width: 100%;
+    background-color: var(--red);
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--white);
+    margin-top: 5rem;
+    cursor: pointer;
 }
 
 .modal {

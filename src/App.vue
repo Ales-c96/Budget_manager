@@ -64,10 +64,16 @@ const closeModal = () => {
 }
 
 const saveExpense = () => {
-  expenses.value.push({
-    ...expense,
-    id: generateID()
-  })
+  if (expense.id) {
+    const id = expense.id
+    const index = expenses.value.findIndex((expense => expense.id === id))
+    expenses.value[index] = { ...expense }
+  } else {
+    expenses.value.push({
+      ...expense,
+      id: generateID()
+    })
+  }
   //Close the modal after setting an expense
   closeModal()
 }
@@ -76,6 +82,11 @@ const selectExpense = id => {
   const editExpense = expenses.value.filter(expense => expense.id === id)[0];
   Object.assign(expense, editExpense);
   showModal()
+}
+
+const deleteExpense = () => {
+  expenses.value = expenses.value.filter(expenseState => expenseState.id !== expense.id)
+  closeModal()
 }
 
 </script>
@@ -99,7 +110,7 @@ const selectExpense = id => {
       </div>
       <Modal v-if="modal.show" @close-modal="closeModal" @save-expense="saveExpense" :modal="modal"
         v-model:name="expense.name" v-model:category="expense.category" v-model:quantity="expense.quantity"
-        :availableBudget="availableBudget" />
+        :availableBudget="availableBudget" :id="expense.id" @delete-expense="deleteExpense" />
     </main>
   </div>
 </template>
