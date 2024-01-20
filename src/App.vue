@@ -22,6 +22,7 @@ const expense = reactive({
   quantity: '',
   category: ''
 })
+
 const modal = reactive({
   show: false,
   animate: false
@@ -50,6 +51,14 @@ const showModal = () => {
 const closeModal = () => {
   setTimeout(() => {
     modal.show = false
+    //Reload the expense Object
+    Object.assign(expense, {
+      id: null,
+      date: Date.now(),
+      name: '',
+      quantity: '',
+      category: ''
+    })
   }, 300);
   modal.animate = false
 }
@@ -61,14 +70,12 @@ const saveExpense = () => {
   })
   //Close the modal after setting an expense
   closeModal()
-  //Reload the expense Object
-  Object.assign(expense, {
-    id: null,
-    date: Date.now(),
-    name: '',
-    quantity: '',
-    category: ''
-  })
+}
+
+const selectExpense = id => {
+  const editExpense = expenses.value.filter(expense => expense.id === id)[0];
+  Object.assign(expense, editExpense);
+  showModal()
 }
 
 </script>
@@ -85,7 +92,7 @@ const saveExpense = () => {
     <main v-if="budget > 0">
       <div class="expenses-list container">
         <h2>{{ expenses.length > 0 ? 'Gastos' : 'No hay gastos' }}</h2>
-        <Expense v-for="expense in expenses" :key="expense.id" :expense="expense" />
+        <Expense v-for="expense in expenses" :key="expense.id" :expense="expense" @select-expense="selectExpense" />
       </div>
       <div class="create-budget">
         <img :src="newBudgetIcon" alt="Icono nuevo gasto" @click="showModal">
