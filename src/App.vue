@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, watch, computed } from 'vue'
+import { ref, reactive, watch, computed, onMounted } from 'vue'
 import { generateID } from './helpers'
 
 import Budget from './components/Budget.vue'
@@ -34,9 +34,26 @@ watch(expenses, () => {
   const totalExpenses = expenses.value.reduce((total, expense) => expense.quantity + total, 0)
   expended.value = totalExpenses
   availableBudget.value = budget.value - totalExpenses
+  localStorage.setItem('expenses', JSON.stringify(expenses.value))
 }, {
   deep: true
 })
+
+watch(budget, () => {
+  localStorage.setItem('budget', budget.value)
+})
+
+onMounted(() => {
+  const storageBudget = localStorage.getItem('budget')
+  const storageExpenses = localStorage.getItem('expenses')
+  if(storageBudget) {
+    budget.value = Number(storageBudget)
+    availableBudget.value = Number(storageBudget)
+  }
+  if(storageExpenses) {
+    expenses.value = JSON.parse(storageExpenses)
+  }
+}) 
 
 const defineBudget = (quantity) => {
   budget.value = quantity
@@ -98,6 +115,13 @@ const filteredExpenses = computed(() => {
   return expenses.value
 })
 
+const resetBudget = () => {
+  if(confirm('¿Deseas resetear todo el presupuesto y sus gastos?')) {
+    expenses.value = []
+    budget.value = 0
+  }
+}
+
 </script>
 
 <template>
@@ -106,7 +130,7 @@ const filteredExpenses = computed(() => {
       <h1>Gestor de Gastos</h1>
       <div class="header-container container shadow">
         <Budget v-if="budget === 0" @define-budget="defineBudget" />
-        <BudgetControl v-else :budget="budget" :availableBudget="availableBudget" :expended="expended" />
+        <BudgetControl v-else :budget="budget" :availableBudget="availableBudget" :expended="expended" @reset-budget="resetBudget" />
       </div>
     </header>
     <main v-if="budget > 0">

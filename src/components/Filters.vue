@@ -8,10 +8,9 @@ defineEmits(['update:filter'])
         <form>
             <div class="field">
                 <label for="filterExpense">Filtrar Gastos</label>
-                <select name="filterExpense" id="filterExpense" :value="category"
+                <select name="filterExpense" id="filterExpense" :value="filter"
                     @input="$emit('update:filter', $event.target.value)">
-                    <option value="" disabled>-- Seleccione --</option>
-                    <option value="0">Todos los gastos</option>
+                    <option value="">-- Todos los gastos --</option>
                     <option value="ahorro">Ahorro</option>
                     <option value="comida">Comida</option>
                     <option value="casa">Casa</option>
