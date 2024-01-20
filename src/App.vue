@@ -1,11 +1,12 @@
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 import { generateID } from './helpers'
 
 import Budget from './components/Budget.vue'
 import BudgetControl from './components/BudgetControl.vue'
 import Modal from './components/Modal.vue'
 import Expense from './components/Expense.vue'
+import Filters from './components/Filters.vue'
 
 //Assets
 import newBudgetIcon from './assets/img/nuevo-gasto.svg'
@@ -14,6 +15,7 @@ const budget = ref(0)
 const availableBudget = ref(0)
 const expended = ref(0)
 const expenses = ref([])
+const filter = ref('')
 
 const expense = reactive({
   id: null,
@@ -89,6 +91,13 @@ const deleteExpense = () => {
   closeModal()
 }
 
+const filteredExpenses = computed(() => {
+  if (filter.value) {
+    return expenses.value.filter(expense => expense.category === filter.value)
+  }
+  return expenses.value
+})
+
 </script>
 
 <template>
@@ -101,9 +110,11 @@ const deleteExpense = () => {
       </div>
     </header>
     <main v-if="budget > 0">
+      <Filters v-model:filter="filter" />
       <div class="expenses-list container">
-        <h2>{{ expenses.length > 0 ? 'Gastos' : 'No hay gastos' }}</h2>
-        <Expense v-for="expense in expenses" :key="expense.id" :expense="expense" @select-expense="selectExpense" />
+        <h2>{{ filteredExpenses.length > 0 ? 'Gastos' : 'No hay gastos' }}</h2>
+        <Expense v-for="expense in filteredExpenses" :key="expense.id" :expense="expense"
+          @select-expense="selectExpense" />
       </div>
       <div class="create-budget">
         <img :src="newBudgetIcon" alt="Icono nuevo gasto" @click="showModal">
